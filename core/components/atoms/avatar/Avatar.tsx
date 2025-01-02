@@ -7,6 +7,7 @@ import { AccentAppearance, AvatarSize, AvatarShape } from '@/common.type';
 import AvatarIcon from './avatarIcon';
 import AvatarImage from './avatarImage';
 import AvatarProvider from './AvatarProvider';
+import styles from '@css/components/avatar.module.css';
 
 type TPresence = 'active' | 'away';
 
@@ -64,6 +65,10 @@ export interface AvatarProps extends BaseProps {
    */
   presence?: TPresence;
   /**
+   * Show status indicator for the `Avatar`
+   */
+  status?: React.ReactNode;
+  /**
    * Stroke color of `Presence indicator` & `Status indicator` in `Avatar`
    */
   strokeColor?: string;
@@ -88,6 +93,7 @@ export const Avatar = (props: AvatarProps) => {
     tooltipSuffix,
     tabIndex,
     presence,
+    status,
     strokeColor,
     role = 'presentation',
   } = props;
@@ -112,38 +118,39 @@ export const Avatar = (props: AvatarProps) => {
 
   const darkAppearance = ['secondary', 'success', 'warning', 'accent1', 'accent4'];
   const showPresence = presence && !disabled && shape === 'round';
+  const showStatus = status && size === 'regular' && shape === 'round';
 
   const AvatarClassNames = classNames(
     {
-      Avatar: true,
-      ['Avatar--square']: shape === 'square',
-      [`Avatar--${size}`]: shape !== 'square',
-      [`Avatar--${AvatarAppearance}`]: AvatarAppearance,
-      ['Avatar--noInitials']: !initials || !withTooltip,
-      ['Avatar--disabled']: disabled,
-      ['Avatar--default']: !disabled,
+      [styles.Avatar]: true,
+      [styles['Avatar--square']]: shape === 'square',
+      [styles[`Avatar--${size}`]]: shape !== 'square',
+      [styles[`Avatar--${AvatarAppearance}`]]: AvatarAppearance,
+      [styles['Avatar--noInitials']]: !initials || !withTooltip,
+      [styles['Avatar--disabled']]: disabled,
+      [styles['Avatar--default']]: !disabled,
     },
     className
   );
 
   const AvatarWrapperClassNames = classNames({
-    ['Avatar-wrapper--square']: shape === 'square',
-    [`Avatar--${size}`]: shape === 'square',
+    [styles['Avatar-wrapper--square']]: shape === 'square',
+    [styles[`Avatar--${size}`]]: shape === 'square',
   });
 
   const TextClassNames = classNames({
-    [`Avatar-content--${size}`]: size,
-    ['Avatar-content']: darkAppearance.includes(AvatarAppearance),
+    [styles[`Avatar-content--${size}`]]: size,
+    [styles['Avatar-content']]: darkAppearance.includes(AvatarAppearance),
   });
 
   const IconClassNames = classNames({
-    ['Avatar-content']: darkAppearance.includes(AvatarAppearance),
+    [styles['Avatar-content']]: darkAppearance.includes(AvatarAppearance),
   });
 
   const presenceClassNames = classNames({
-    ['Avatar-presence']: presence,
-    ['Avatar-presence--active']: presence === 'active',
-    ['Avatar-presence--away']: presence === 'away',
+    [styles['Avatar-presence']]: presence,
+    [styles['Avatar-presence--active']]: presence === 'active',
+    [styles['Avatar-presence--away']]: presence === 'away',
   });
 
   const borderStyle = {
@@ -214,6 +221,11 @@ export const Avatar = (props: AvatarProps) => {
       )}
       {showPresence && (
         <span data-test="DesignSystem-Avatar--Presence" className={presenceClassNames} style={borderStyle} />
+      )}
+      {showStatus && (
+        <span data-test="DesignSystem-Avatar--Status" className={styles['Avatar-status']} style={borderStyle}>
+          {status}
+        </span>
       )}
     </span>
   );

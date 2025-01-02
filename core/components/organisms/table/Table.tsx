@@ -18,6 +18,8 @@ import { BaseProps, extractBaseProps } from '@/utils/types';
 import { debounce } from 'throttle-debounce';
 import { PaginationProps } from '@/components/molecules/pagination';
 import { getUpdatedData, removeDuplicate } from './utils';
+import tableStyles from '@css/components/table.module.css';
+import classNames from 'classnames';
 
 export interface ErrorTemplateProps {
   errorType?: TableProps['errorType'];
@@ -148,6 +150,13 @@ interface AsyncProps {
    *      sortingList?: TableProps['filterList'];
    *      searchTerm?: string;
    *  }
+   * </pre>
+   *
+   * <pre className="DocPage-codeBlock">
+   * fetchData returns a promise which
+   *  - resolves with data, schema, count and searchTerm
+   *  - rejects with error: true, errorType: 'FAILED\_TO\_FETCH'
+   *  - resolves with no records found, error: true, errorType: 'NO\_RECORDS\_FOUND'
    * </pre>
    */
   fetchData?: fetchDataFunction;
@@ -297,6 +306,22 @@ interface SharedTableProps extends BaseProps {
    *    errorType: TableProps['errorType']
    * }
    * </pre>
+   *
+   * Default errorTemplate:
+   *
+   * <pre class="DocPage-codeBlock mx-6 mb-7">
+   * (props) => {
+   *      const { errorType = 'DEFAULT' } = props;
+   *      const errorMessages = {
+   *        'FAILED\_TO\_FETCH': 'Failed to fetch data',
+   *        'NO\_RECORDS\_FOUND': 'No results found',
+   *        'DEFAULT': 'No results found'
+   *      }
+   *      return(
+   *        \<Heading>{errorMessages[errorType]}\</Heading>
+   *      );
+   * }
+   * </pre>
    */
   errorTemplate?: React.FunctionComponent<ErrorTemplateProps>;
   /**
@@ -405,33 +430,6 @@ export const defaultProps = {
   pageJumpDebounceDuration: 750,
   errorTemplate: defaultErrorTemplate,
 };
-
-/**
- * ###Note:
- * 1. Sync Table:
- *  - Manually toggle loading/error state to update data, schema.
- * 2. Async Table:
- *  - fetchData return:
- *    - Promise resolve with no records:
- *      error: true, errorType: 'NO\_RECORDS\_FOUND'
- *    - Promise reject:
- *      error: true, errorType: 'FAILED\_TO\_FETCH'
- * 3. Default errorTemplate:
- *
- * <pre class="DocPage-codeBlock mx-6 mb-7">
- * (props) => {
- *      const { errorType = 'DEFAULT' } = props;
- *      const errorMessages = {
- *        'FAILED\_TO\_FETCH': 'Failed to fetch data',
- *        'NO\_RECORDS\_FOUND': 'No results found',
- *        'DEFAULT': 'No results found'
- *      }
- *      return(
- *        \<Heading>{errorMessages[errorType]}\</Heading>
- *      );
- * }
- * </pre>
- */
 
 export class Table extends React.Component<TableProps, TableState> {
   static defaultProps = defaultProps;
@@ -912,11 +910,12 @@ export class Table extends React.Component<TableProps, TableState> {
 
     const { totalRecords } = this.state;
     const totalPages = getTotalPages(totalRecords, pageSize);
+    const tableClass = classNames(tableStyles['Table'], classes);
 
     return (
-      <div {...baseProps} className={`Table${classes}`} data-test="DesignSystem-Table-wrapper">
+      <div {...baseProps} className={tableClass} data-test="DesignSystem-Table-wrapper">
         {withHeader && (
-          <div className="Table-header" data-test="DesignSystem-Table-header">
+          <div data-test="DesignSystem-Table-header">
             <Header
               {...this.state}
               // updateData={updateData}
@@ -941,7 +940,7 @@ export class Table extends React.Component<TableProps, TableState> {
             </Header>
           </div>
         )}
-        <div className="Table-grid">
+        <div className={tableStyles['Table-grid']}>
           <Grid
             {...this.state}
             key={this.state.searchTerm}
@@ -970,7 +969,7 @@ export class Table extends React.Component<TableProps, TableState> {
           />
         </div>
         {withPagination && !this.state.loading && !this.state.error && totalPages > 1 && (
-          <div className="Table-pagination">
+          <div className={tableStyles['Table-pagination']}>
             <Pagination
               page={this.state.page}
               totalPages={getTotalPages(totalRecords, pageSize)}
